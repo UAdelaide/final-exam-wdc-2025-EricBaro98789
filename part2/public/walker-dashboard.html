@@ -171,14 +171,14 @@ onMounted(async () => {
 });
 
       // --- Return reactive state and methods to the template ---
-      return {
-        walks,
-        message,
-        error,
-        user,         // ADDED
-        applyToWalk,
-        logout        // ADDED
-      };
+return {
+  walks,
+  message,
+  error,
+  user,
+  applyToWalk
+};
+
     }
   }).mount('#app');
 </script>
