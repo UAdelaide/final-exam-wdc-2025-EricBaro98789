@@ -1,24 +1,33 @@
+//
+// File: part2/routes/loginRoutes.js (Modified)
+// Description: Handles all authentication-related routes, now with password validation.
+//
 const express = require('express');
 const router = express.Router();
 // Assuming your database connection pool is exported from here
 const db = require('../models/db');
 
-// --- API endpoint to handle user login ---
-// This route validates a user by username and creates a session on success.
+// --- MODIFIED: API endpoint to handle user login with password ---
 router.post('/login', async (req, res) => {
-  const { username } = req.body;
+  // Now we expect both username and password from the request body
+  const { username, password } = req.body;
 
   // Basic validation
-  if (!username) {
-    return res.status(400).json({ error: 'Username is required' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
   }
 
   try {
-    // Check if the user exists in the database
-    const [rows] = await db.execute('SELECT user_id, username, role FROM Users WHERE username = ?', [username]);
+    // MODIFIED: The SQL query now checks both username and password_hash.
+    // Note: This compares the plain text password with the 'hashed' password in the DB.
+    // In a real application, you would use a library like bcrypt to compare a hashed password.
+    const [rows] = await db.execute(
+      'SELECT user_id, username, role FROM Users WHERE username = ? AND password_hash = ?',
+      [username, password]
+    );
 
     if (rows.length > 0) {
-      // User found, store user info in the session
+      // User found, credentials are valid. Store user info in the session.
       const user = rows[0];
       req.session.user = {
         id: user.user_id,
@@ -28,8 +37,8 @@ router.post('/login', async (req, res) => {
       // Send back a success response with the user's role for redirection
       res.json({ success: true, role: user.role });
     } else {
-      // User not found, send an unauthorized error
-      res.status(401).json({ success: false, error: 'User not found.' });
+      // User not found or password incorrect, send an unauthorized error
+      res.status(401).json({ success: false, error: 'Invalid username or password.' });
     }
   } catch (err) {
     console.error('Login error:', err);
@@ -37,25 +46,22 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// --- API endpoint to check for an active session ---
-// This allows the frontend to see if a user is already logged in on page load.
+// --- UNCHANGED: API endpoint to check for an active session ---
 router.get('/check-session', (req, res) => {
   if (req.session.user) {
-    // If a user is found in the session, return their data
     res.json({ loggedIn: true, user: req.session.user });
   } else {
-    // Otherwise, indicate that no user is logged in
     res.json({ loggedIn: false });
   }
 });
 
-// --- API endpoint to handle user logout ---
+// --- UNCHANGED: API endpoint to handle user logout ---
 router.post('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
       return res.status(500).json({ error: 'Could not log out.' });
     }
-    res.clearCookie('connect.sid'); // Clears the session cookie
+    res.clearCookie('connect.sid');
     res.json({ success: true });
   });
 });
