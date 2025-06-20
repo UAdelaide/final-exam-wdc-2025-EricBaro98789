@@ -132,17 +132,21 @@
        * MODIFIED: Fetches only the walk requests for the currently logged-in owner.
        * This function is now called by checkSession() after successful authentication.
        */
-      async function loadWalks() {
-        if (!user.value) return; // Don't run if the user isn't loaded yet
-        try {
-          // You would typically fetch walks for a specific user, e.g., /api/walks/my-walks
-          // For now, we'll assume /api/walks is filtered on the backend or shows all for simplicity.
-          const res = await fetch('/api/walks');
-          walks.value = await res.json();
-        } catch (err) {
-          error.value = 'Failed to load walk requests';
+
+        async function loadWalks() {
+          if (!user.value) return; // Don't run if the user isn't loaded yet
+          try {
+            //
+            // --- MODIFIED: The fetch URL now points to the new, protected endpoint ---
+            //
+            const res = await fetch('/api/walks/my-walks');
+
+            if (!res.ok) throw new Error('Failed to load your walk requests');
+            walks.value = await res.json();
+          } catch (err) {
+            error.value = 'Failed to load walk requests';
+          }
         }
-      }
 
       /**
        * Submits the new walk request form to the server.
