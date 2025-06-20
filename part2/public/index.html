@@ -10,85 +10,79 @@
 <body class="bg-light">
 
   <!-- Vue App Container -->
-  <div id="app" class="container py-5 d-flex justify-content-center">
-    <div class="col-md-6">
-      <div class="card shadow-sm">
-        <div class="card-body p-5">
-          <h1 class="card-title text-center text-primary mb-4">Welcome to the Dog Walking Service!</h1>
+  <!-- MODIFIED: Removed d-flex to allow vertical stacking -->
+  <div id="app" class="container py-5">
 
-          <!-- Login Form -->
-          <form @submit.prevent="login">
-            <div class="mb-3">
-              <label for="username" class="form-label">Username</label>
-              <!-- The input is bound to the 'username' data property -->
-              <input type="text" id="username" class="form-control" v-model="username" placeholder="Enter your username" required>
-            </div>
+    <!-- This div now centers the login form by itself -->
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-body p-5">
+            <h1 class="card-title text-center text-primary mb-4">Welcome to the Dog Walking Service!</h1>
 
-            <!-- ADDED: Password field -->
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" id="password" class="form-control" v-model="password" placeholder="Enter your password" required>
-            </div>
-
-            <!-- Error message display: only shows if errorMessage is not empty -->
-            <div v-if="errorMessage" class="alert alert-danger" role="alert">
-              {{ errorMessage }}
-            </div>
-
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary">Login</button>
-            </div>
-          </form>
-
+            <!-- Login Form -->
+            <form @submit.prevent="login">
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" class="form-control" v-model="username" placeholder="Enter your username" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" class="form-control" v-model="password" placeholder="Enter your password" required>
+              </div>
+              <div v-if="errorMessage" class="alert alert-danger" role="alert">
+                {{ errorMessage }}
+              </div>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Login</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-    <!-- ADDED: Table to display all registered dogs with random photos -->
-<div class="mt-5">
-  <h2 class="text-center mb-4">All Registered Dogs</h2>
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <table class="table table-hover align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>Dog ID</th>
-            <th>Name</th>
-            <th>Size</th>
-            <th>Owner ID</th>
-            <th class="text-center">Photo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Shows a loading message while data is being fetched -->
-          <tr v-if="loadingDogs">
-            <td colspan="5" class="text-center p-4">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </td>
-          </tr>
-          <!-- Iterates over the dogs array to create a row for each dog -->
-          <tr v-for="dog in dogs" :key="dog.dog_id">
-            <td>{{ dog.dog_id }}</td>
-            <td>{{ dog.name }}</td>
-            <td>{{ dog.size }}</td>
-            <td>{{ dog.owner_id  }}</td>
-            <td class="text-center">
-              <!-- Displays the random photo fetched from the Dog API -->
-              <img :src="dog.photo" alt="A random dog photo" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
-            </td>
-          </tr>
-        </tbody>
-      </table>
+
+    <!-- Table to display all registered dogs -->
+    <!-- This div will now correctly appear below the login form -->
+    <div class="mt-5">
+      <h2 class="text-center mb-4">All Registered Dogs</h2>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <table class="table table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Dog ID</th>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Owner ID</th>
+                <th class="text-center">Photo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Loading spinner -->
+              <tr v-if="loadingDogs">
+                <td colspan="5" class="text-center p-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </td>
+              </tr>
+              <!-- Dog data rows -->
+              <tr v-for="dog in dogs" :key="dog.dog_id">
+                <td>{{ dog.dog_id }}</td>
+                <td>{{ dog.name }}</td>
+                <td>{{ dog.size }}</td>
+                <td>{{ dog.owner_id }}</td>
+                <td class="text-center">
+                  <img :src="dog.photo" alt="A random dog photo" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-
-
-
-  </div>
-
-
 
   <script>
     const { createApp } = Vue;
@@ -96,42 +90,33 @@
     createApp({
       data() {
         return {
-          username: '',       // Holds the value from the username input field
-          password: '',       // ADDED: Holds the value from the password input field
-          errorMessage: '',    // Holds any error messages to display to the user
-          dogs: [],           // ADDED: To store the list of all dogs
-    loadingDogs: true   // ADDED: To show a loading indicator
+          username: '',
+          password: '',
+          errorMessage: '',
+          dogs: [],
+          loadingDogs: true
         };
       },
       methods: {
-        /**
-         * Handles the login process by sending the username AND password to the backend API.
-         */
         async login() {
-          this.errorMessage = ''; // Clear previous errors
+          this.errorMessage = '';
           try {
             const response = await fetch('/api/login', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 username: this.username,
                 password: this.password
               })
             });
-
             const data = await response.json();
-
             if (response.ok) {
-              // Login was successful, redirect based on the role
               if (data.role === 'owner') {
                 window.location.href = '/owner-dashboard.html';
               } else if (data.role === 'walker') {
                 window.location.href = '/walker-dashboard.html';
               }
             } else {
-              // Login failed, display the error message from the server
               this.errorMessage = data.error || 'Login failed. Please try again.';
             }
           } catch (error) {
@@ -139,47 +124,30 @@
             this.errorMessage = 'An error occurred. Please check the console.';
           }
         },
-
-  async loadAllDogs() {
-    this.loadingDogs = true;
-    try {
-      // 1. Fetch the list of dogs from our local backend API
-      const dogListResponse = await fetch('/api/users/all-dogs');
-      if (!dogListResponse.ok) throw new Error('Failed to fetch dog list');
-      const dogList = await dogListResponse.json();
-
-      // 2. For each dog, create a promise that fetches a random photo
-      const photoPromises = dogList.map(dog =>
-        fetch('https://dog.ceo/api/breeds/image/random')
-          .then(res => res.json())
-          .then(photoData => ({ ...dog, photo: photoData.message }))
-          .catch(() => ({ ...dog, photo: 'https://placehold.co/100/CCCCCC/FFFFFF?text=Error' })) // Handle individual photo fetch errors
-      );
-
-      // 3. Wait for all photo requests to complete and assign the result
-      this.dogs = await Promise.all(photoPromises);
-
-    } catch (error) {
-      console.error('Failed to load dog table:', error);
-      // Optionally display an error in the UI
-    } finally {
-      this.loadingDogs = false; // Hide the loading indicator
-    }
-  },
-
-
-
-        /**
-         * Checks if a user session already exists on page load.
-         */
+        async loadAllDogs() {
+          this.loadingDogs = true;
+          try {
+            const dogListResponse = await fetch('/api/users/all-dogs');
+            if (!dogListResponse.ok) throw new Error('Failed to fetch dog list');
+            const dogList = await dogListResponse.json();
+            const photoPromises = dogList.map(dog =>
+              fetch('https://dog.ceo/api/breeds/image/random')
+                .then(res => res.json())
+                .then(photoData => ({ ...dog, photo: photoData.message }))
+                .catch(() => ({ ...dog, photo: 'https://placehold.co/100/CCCCCC/FFFFFF?text=Error' }))
+            );
+            this.dogs = await Promise.all(photoPromises);
+          } catch (error) {
+            console.error('Failed to load dog table:', error);
+          } finally {
+            this.loadingDogs = false;
+          }
+        },
         async checkSession() {
           try {
             const response = await fetch('/api/check-session');
             const data = await response.json();
-
             if (data.loggedIn) {
-              // If already logged in, redirect to the appropriate dashboard
-              console.log('User already logged in as:', data.user.role);
               if (data.user.role === 'owner') {
                 window.location.href = '/owner-dashboard.html';
               } else if (data.user.role === 'walker') {
@@ -187,19 +155,15 @@
               }
             }
           } catch(error) {
-              console.error('Session check failed:', error);
+            console.error('Session check failed:', error);
           }
         }
       },
-      /**
-       * The mounted lifecycle hook is called when the Vue app is first loaded.
-       */
       mounted() {
         this.checkSession();
-        this.loadAllDogs(); // Call the new function when the page loads
+        this.loadAllDogs();
       }
     }).mount('#app');
-
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
