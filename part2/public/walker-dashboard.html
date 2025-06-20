@@ -73,6 +73,15 @@
       return;
     }
 
+        // Store the fetched user object in the reactive 'user' ref.
+    user.value = await res.json();
+  } catch (err) {
+    error.value = 'Failed to fetch user data. Please log in.';
+    // Also redirect on any other failure.
+    window.location.href = '/index.html';
+  }
+}
+
       async function checkSession() {
         try {
           const res = await fetch('/api/check-session');
