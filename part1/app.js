@@ -242,4 +242,13 @@ app.get('/api/walkers/summary', async (req, res) => {
   }
 });
 
+// ----------------------------------------------------------------------------
+// START THE SERVER
+// ----------------------------------------------------------------------------
+// Define the port to run the server on.
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log(`Server is running and listening on http://localhost:${port}`);
+});
+
 module.exports = app;
