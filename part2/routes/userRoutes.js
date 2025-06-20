@@ -55,4 +55,25 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+// --- ADDED: Endpoint to get dogs for the logged-in owner ---
+//
+router.get('/my-dogs', async (req, res) => {
+  // 1. Check if a user is logged in by looking at the session
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Not authorized. Please log in.' });
+  }
+
+  try {
+    const ownerId = req.session.user.id;
+    // 2. Fetch the ID and name of dogs owned by the logged-in user
+    const [dogs] = await db.query('SELECT dog_id, name FROM Dogs WHERE owner_id = ?', [ownerId]);
+    res.json(dogs);
+  } catch (error) {
+    console.error('Failed to fetch user dogs:', error);
+    res.status(500).json({ error: 'Failed to fetch your dogs' });
+  }
+});
+
+
 module.exports = router;
