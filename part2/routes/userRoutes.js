@@ -35,7 +35,7 @@ router.get('/me', (req, res) => {
   res.json(req.session.user);
 });
 
-// POST login 
+// POST login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -79,7 +79,6 @@ router.get('/my-dogs', async (req, res) => {
 //
 router.get('/all-dogs', async (req, res) => {
   try {
-    // MODIFIED: This query now selects the owner_id directly and no longer needs a JOIN.
     const [rows] = await db.query(`
       SELECT dog_id, name, size, owner_id
       FROM Dogs
