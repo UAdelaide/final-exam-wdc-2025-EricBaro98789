@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 
-var session = require('express-session'); // Added to manage user sessions
 
 require('dotenv').config();
 
