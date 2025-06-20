@@ -120,25 +120,23 @@
        * ID of the currently logged-in walker.
        */
       async function applyToWalk(requestId) {
-        // Ensure user data is loaded before allowing an application
+        // Add a guard clause to ensure user data has been loaded.
         if (!user.value) {
-          error.value = "You must be logged in to apply.";
-          return;
+            error.value = "Cannot apply. User information is not available.";
+            return;
         }
         try {
           const res = await fetch(`/api/walks/${requestId}/apply`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // Use the logged-in user's ID from the session data
+            // The body now uses the ID from the fetched user object.
             body: JSON.stringify({ walker_id: user.value.id })
           });
           const result = await res.json();
 
           if (!res.ok) throw new Error(result.error || 'Application failed');
-
           message.value = result.message;
           error.value = '';
-          // Reload the list to remove the walk that was just applied for (assuming it's now 'accepted')
           await loadWalkRequests();
         } catch (err) {
           error.value = err.message;
