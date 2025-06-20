@@ -63,6 +63,16 @@
        * If the user is not logged in, it redirects them to the login page.
        * If they are logged in, it stores their data and loads available walk requests.
        */
+
+      async function getCurrentUser() {
+  try {
+    const res = await fetch('/api/users/me');
+    if (!res.ok) {
+      // If the response is not OK (e.g., 401 Unauthorized), redirect to login.
+      window.location.href = '/index.html';
+      return;
+    }
+
       async function checkSession() {
         try {
           const res = await fetch('/api/check-session');
