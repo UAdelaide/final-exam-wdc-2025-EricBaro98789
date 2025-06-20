@@ -200,9 +200,7 @@ app.get('/api/walkrequests/open', async (req, res) => {
  */
 app.get('/api/walkers/summary', async (req, res) => {
   try {
-    // This query is more complex. It uses LEFT JOINs to ensure all walkers are included,
-    // even if they have no ratings or completed walks.
-    // COALESCE is used to turn NULL results (for walkers with no data) into 0.
+
     const sql = `
       SELECT
         u.username AS walker_username,
