@@ -1,7 +1,6 @@
 
 const express = require('express');
 const router = express.Router();
-// Assuming your database connection pool is exported from here
 const db = require('../models/db');
 
 router.post('/login', async (req, res) => {
@@ -14,8 +13,7 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    // Note: This compares the plain text password with the 'hashed' password in the DB.
-    // In a real application, you would use a library like bcrypt to compare a hashed password.
+
     const [rows] = await db.execute(
       'SELECT user_id, username, role FROM Users WHERE username = ? AND password_hash = ?',
       [username, password]
