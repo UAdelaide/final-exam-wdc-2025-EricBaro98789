@@ -16,9 +16,7 @@ let db;
 // ----------------------------------------------------------------------------
 // DATABASE SETUP
 // ----------------------------------------------------------------------------
-// This is an IIFE (Immediately Invoked Function Expression) that runs once on startup.
-// It connects to MySQL, creates the database and tables if they don't exist,
-// and inserts sample data if the tables are empty.
+
 (async () => {
   try {
     // 1. Connect to MySQL server (without specifying a database)
