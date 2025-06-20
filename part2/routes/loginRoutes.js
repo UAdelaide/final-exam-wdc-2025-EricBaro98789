@@ -41,7 +41,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// --- UNCHANGED: API endpoint to check for an active session ---
 router.get('/check-session', (req, res) => {
   if (req.session.user) {
     res.json({ loggedIn: true, user: req.session.user });
@@ -50,7 +49,6 @@ router.get('/check-session', (req, res) => {
   }
 });
 
-// --- UNCHANGED: API endpoint to handle user logout ---
 router.post('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
