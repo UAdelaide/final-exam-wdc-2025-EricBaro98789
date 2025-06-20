@@ -45,59 +45,122 @@
     </div>
     <p v-else>No available walk requests at the moment.</p>
   </div>
+<script>
+  const { createApp, ref, onMounted } = Vue;
 
-  <script>
-    const { createApp, ref, onMounted } = Vue;
+  createApp({
+    setup() {
+      // --- Reactive State ---
+      const walks = ref([]);        // Holds the list of available walk requests
+      const message = ref('');      // For success messages
+      const error = ref('');        // For error messages
+      const user = ref(null);       // MODIFIED: Will hold the logged-in user's data
 
-    createApp({
-      setup() {
-        const walks = ref([]);
-        const message = ref('');
-        const error = ref('');
-        const user = 3;
+      // --- Methods ---
 
-        async function loadWalkRequests() {
-          try {
-            const res = await fetch('/api/walks');
-            if (!res.ok) throw new Error('Failed to load walk requests');
-            walks.value = await res.json();
-          } catch (err) {
-            error.value = err.message;
+      /**
+       * ADDED: Checks for an active user session when the page loads.
+       * If the user is not logged in, it redirects them to the login page.
+       * If they are logged in, it stores their data and loads available walk requests.
+       */
+      async function checkSession() {
+        try {
+          const res = await fetch('/api/check-session');
+          const data = await res.json();
+          if (!data.loggedIn) {
+            // User is not authenticated, redirect to login
+            window.location.href = '/index.html';
+          } else {
+            // User is authenticated, store their data and load content
+            user.value = data.user;
+            loadWalkRequests();
           }
+        } catch (err) {
+          error.value = 'Session check failed. Please log in.';
+          // Redirect on failure to be safe
+          window.location.href = '/index.html';
         }
-
-        async function applyToWalk(requestId) {
-          try {
-            const res = await fetch(`/api/walks/${requestId}/apply`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ walker_id: user })
-            });
-            const result = await res.json();
-
-            if (!res.ok) throw new Error(result.error || 'Application failed');
-            message.value = result.message;
-            error.value = '';
-            await loadWalkRequests();
-          } catch (err) {
-            error.value = err.message;
-            message.value = '';
-          }
-        }
-
-        onMounted(() => {
-          loadWalkRequests();
-        });
-
-        return {
-          walks,
-          message,
-          error,
-          applyToWalk
-        };
       }
-    }).mount('#app');
-  </script>
+
+      /**
+       * Fetches all open walk requests from the server.
+       * This function is now called by checkSession() after successful authentication.
+       */
+      async function loadWalkRequests() {
+        try {
+          const res = await fetch('/api/walks');
+          if (!res.ok) throw new Error('Failed to load walk requests');
+          walks.value = await res.json();
+        } catch (err) {
+          error.value = err.message;
+        }
+      }
+
+      /**
+       * MODIFIED: Submits an application for a walk request using the
+       * ID of the currently logged-in walker.
+       */
+      async function applyToWalk(requestId) {
+        // Ensure user data is loaded before allowing an application
+        if (!user.value) {
+          error.value = "You must be logged in to apply.";
+          return;
+        }
+        try {
+          const res = await fetch(`/api/walks/${requestId}/apply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // Use the logged-in user's ID from the session data
+            body: JSON.stringify({ walker_id: user.value.id })
+          });
+          const result = await res.json();
+
+          if (!res.ok) throw new Error(result.error || 'Application failed');
+
+          message.value = result.message;
+          error.value = '';
+          // Reload the list to remove the walk that was just applied for (assuming it's now 'accepted')
+          await loadWalkRequests();
+        } catch (err) {
+          error.value = err.message;
+          message.value = '';
+        }
+      }
+
+      /**
+       * ADDED: Logs the user out by calling the logout endpoint
+       * and redirects to the login page.
+       */
+      async function logout() {
+        try {
+          await fetch('/api/logout', { method: 'POST' });
+          window.location.href = '/index.html';
+        } catch (err) {
+          error.value = 'Logout failed. Please try again.';
+        }
+      }
+
+      // --- Lifecycle Hook ---
+      /**
+       * MODIFIED: onMounted now calls checkSession to ensure the user is
+       * authenticated before any other action is taken.
+       */
+      onMounted(() => {
+        checkSession();
+      });
+
+      // --- Return reactive state and methods to the template ---
+      return {
+        walks,
+        message,
+        error,
+        user,         // ADDED
+        applyToWalk,
+        logout        // ADDED
+      };
+    }
+  }).mount('#app');
+</script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
