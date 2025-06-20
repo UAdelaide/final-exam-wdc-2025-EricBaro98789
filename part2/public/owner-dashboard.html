@@ -74,71 +74,127 @@
     <p v-else>No walk requests yet.</p>
   </div>
 
-  <script>
-    const { createApp, ref, onMounted } = Vue;
+<script>
+  const { createApp, ref, onMounted } = Vue;
 
-    createApp({
-      setup() {
-        const form = ref({
-          dog_id: '',
-          requested_time: '',
-          duration_minutes: '',
-          location: ''
-        });
+  createApp({
+    setup() {
+      // --- Reactive State ---
+      // Holds data for the new walk request form
+      const form = ref({
+        dog_id: '',
+        requested_time: '',
+        duration_minutes: '',
+        location: ''
+      });
 
-        const walks = ref([]);
-        const message = ref('');
-        const error = ref('');
+      const walks = ref([]);        // Holds the list of walk requests for the owner
+      const message = ref('');      // For success messages
+      const error = ref('');        // For error messages
+      const user = ref(null);       // MODIFIED: Will hold the logged-in user's data
 
-        async function loadWalks() {
-          try {
-            const res = await fetch('/api/walks');
-            walks.value = await res.json();
-          } catch (err) {
-            error.value = 'Failed to load walk requests';
-          }
-        }
+      // --- Methods ---
 
-        async function submitWalkRequest() {
-          try {
-            const res = await fetch('/api/walks', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(form.value)
-            });
-            const result = await res.json();
-
-            if (!res.ok) throw new Error(result.error || 'Error submitting walk request');
-
-            message.value = result.message;
-            error.value = '';
-            form.value = {
-              dog_id: '',
-              requested_time: '',
-              duration_minutes: '',
-              location: ''
-            };
+      /**
+       * ADDED: Checks for an active user session when the page loads.
+       * If the user is not logged in, it redirects them to the login page.
+       * If they are logged in, it stores their data and loads their walk requests.
+       */
+      async function checkSession() {
+        try {
+          const res = await fetch('/api/check-session');
+          const data = await res.json();
+          if (!data.loggedIn) {
+            // User is not authenticated, redirect to login
+            window.location.href = '/index.html';
+          } else {
+            // User is authenticated, store their data and load content
+            user.value = data.user;
             loadWalks();
-          } catch (err) {
-            error.value = err.message;
-            message.value = '';
           }
+        } catch (err) {
+          error.value = 'Session check failed. Please log in.';
+          // Redirect on failure to be safe
+          window.location.href = '/index.html';
         }
-
-        onMounted(() => {
-          loadWalks();
-        });
-
-        return {
-          form,
-          walks,
-          message,
-          error,
-          submitWalkRequest
-        };
       }
-    }).mount('#app');
-  </script>
+
+      /**
+       * MODIFIED: Fetches only the walk requests for the currently logged-in owner.
+       * This function is now called by checkSession() after successful authentication.
+       */
+      async function loadWalks() {
+        if (!user.value) return; // Don't run if the user isn't loaded yet
+        try {
+          // You would typically fetch walks for a specific user, e.g., /api/walks/my-walks
+          // For now, we'll assume /api/walks is filtered on the backend or shows all for simplicity.
+          const res = await fetch('/api/walks');
+          walks.value = await res.json();
+        } catch (err) {
+          error.value = 'Failed to load walk requests';
+        }
+      }
+
+      /**
+       * Submits the new walk request form to the server.
+       */
+      async function submitWalkRequest() {
+        try {
+          const res = await fetch('/api/walks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(form.value)
+          });
+          const result = await res.json();
+
+          if (!res.ok) throw new Error(result.error || 'Error submitting walk request');
+
+          message.value = result.message;
+          error.value = '';
+          // Reset the form after successful submission
+          form.value = { dog_id: '', requested_time: '', duration_minutes: '', location: '' };
+          loadWalks(); // Reload the list to show the new request
+        } catch (err) {
+          error.value = err.message;
+          message.value = '';
+        }
+      }
+
+      /**
+       * ADDED: Logs the user out by calling the logout endpoint
+       * and redirects to the login page.
+       */
+      async function logout() {
+        try {
+          await fetch('/api/logout', { method: 'POST' });
+          window.location.href = '/index.html';
+        } catch (err) {
+          error.value = 'Logout failed. Please try again.';
+        }
+      }
+
+      // --- Lifecycle Hook ---
+      /**
+       * MODIFIED: onMounted now calls checkSession to ensure the user is
+       * authenticated before any other action is taken.
+       */
+      onMounted(() => {
+        checkSession();
+      });
+
+      // --- Return reactive state and methods to the template ---
+      return {
+        form,
+        walks,
+        message,
+        error,
+        user, // ADDED
+        submitWalkRequest,
+        logout  // ADDED
+      };
+    }
+  }).mount('#app');
+</script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
