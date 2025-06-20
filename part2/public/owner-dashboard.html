@@ -28,17 +28,17 @@
       </div>
       <div class="card-body">
         <form @submit.prevent="submitWalkRequest">
-<div class="mb-3">
-  <label class="form-label">Select Your Dog</label>
-  <select v-model="form.dog_id" class="form-select" required>
-    <!-- Default disabled option -->
-    <option disabled value="">-- Choose a dog --</option>
-    <!-- Dynamically populated options from the owner's list of dogs -->
-    <option v-for="dog in myDogs" :key="dog.dog_id" :value="dog.dog_id">
-      {{ dog.name }}
-    </option>
-  </select>
-</div>
+          <div class="mb-3">
+            <label class="form-label">Select Your Dog</label>
+            <select v-model="form.dog_id" class="form-select" required>
+              <!-- Default disabled option -->
+              <option disabled value="">-- Choose a dog --</option>
+              <!-- Dynamically populated options from the owner's list of dogs -->
+              <option v-for="dog in myDogs" :key="dog.dog_id" :value="dog.dog_id">
+                {{ dog.name }}
+              </option>
+            </select>
+          </div>
           <button type="submit" class="btn btn-success">Create Walk</button>
         </form>
       </div>
