@@ -64,20 +64,20 @@
        */
 
       async function getCurrentUser() {
-  try {
-    const res = await fetch('/api/users/me');
-    if (!res.ok) {
-      // If the response is not OK (e.g., 401 Unauthorized), redirect to login.
-      window.location.href = '/index.html';
-      return;
-    }
+            try {
+              const res = await fetch('/api/users/me');
+              if (!res.ok) {
+                // If the response is not OK (e.g., 401 Unauthorized), redirect to login.
+                window.location.href = '/index.html';
+                return;
+              }
 
-        // Store the fetched user object in the reactive 'user' ref.
-    user.value = await res.json();
-  } catch (err) {
-    error.value = 'Failed to fetch user data. Please log in.';
-    // Also redirect on any other failure.
-    window.location.href = '/index.html';
+                  // Store the fetched user object in the reactive 'user' ref.
+              user.value = await res.json();
+            } catch (err) {
+              error.value = 'Failed to fetch user data. Please log in.';
+              // Also redirect on any other failure.
+              window.location.href = '/index.html';
   }
 }
 
