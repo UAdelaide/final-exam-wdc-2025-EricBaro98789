@@ -59,4 +59,31 @@ router.post('/:id/apply', async (req, res) => {
   }
 });
 
+// --- ADDED: Route to get walk requests for the logged-in owner ---
+//
+router.get('/my-walks', async (req, res) => {
+  // 1. Ensure a user is logged in by checking the session
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Not authorized. Please log in.' });
+  }
+
+  try {
+    const ownerId = req.session.user.id;
+
+    // 2. Fetch all walk requests associated with dogs owned by this user
+    const [rows] = await db.query(`
+      SELECT wr.*, d.name AS dog_name, d.size
+      FROM WalkRequests wr
+      JOIN Dogs d ON wr.dog_id = d.dog_id
+      WHERE d.owner_id = ?
+      ORDER BY wr.requested_time DESC
+    `, [ownerId]);
+
+    res.json(rows);
+  } catch (error) {
+    console.error('SQL Error:', error);
+    res.status(500).json({ error: 'Failed to fetch your walk requests' });
+  }
+});
+
 module.exports = router;
