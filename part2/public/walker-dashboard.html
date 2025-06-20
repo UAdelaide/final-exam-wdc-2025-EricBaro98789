@@ -162,9 +162,13 @@
        * MODIFIED: onMounted now calls checkSession to ensure the user is
        * authenticated before any other action is taken.
        */
-      onMounted(() => {
-        checkSession();
-      });
+onMounted(async () => {
+  await getCurrentUser();
+  // Only load walk requests after successfully getting the current user.
+  if(user.value) {
+      loadWalkRequests();
+  }
+});
 
       // --- Return reactive state and methods to the template ---
       return {
