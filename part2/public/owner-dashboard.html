@@ -169,6 +169,35 @@
         }
       }
 
+
+
+
+      async function loadMyDogs() {
+        try {
+          const res = await fetch('/api/users/my-dogs');
+          if (!res.ok) throw new Error('Could not fetch your dogs.');
+          myDogs.value = await res.json();
+        } catch (err) {
+          error.value = err.message;
+        }
+      }
+
+      async function checkSession() {
+        try {
+          const res = await fetch('/api/check-session');
+          const data = await res.json();
+          if (!data.loggedIn) {
+            window.location.href = '/index.html';
+          } else {
+            user.value = data.user;
+            loadWalks();
+            loadMyDogs(); // MODIFIED: Call the new function here
+          }
+        } catch (err) {
+          // ...
+        }
+      }
+
       // --- Lifecycle Hook ---
       /**
        * MODIFIED: onMounted now calls checkSession to ensure the user is
