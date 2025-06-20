@@ -79,13 +79,11 @@ router.get('/my-dogs', async (req, res) => {
 //
 router.get('/all-dogs', async (req, res) => {
   try {
-    // This query joins the Dogs and Users tables to get the dog's name, size,
-    // and the owner's username, which is exactly what the frontend needs.
+    // MODIFIED: This query now selects the owner_id directly and no longer needs a JOIN.
     const [rows] = await db.query(`
-      SELECT d.dog_id, d.name, d.size, u.username as owner_username
-      FROM Dogs d
-      JOIN Users u ON d.owner_id = u.user_id
-      ORDER BY d.dog_id
+      SELECT dog_id, name, size, owner_id
+      FROM Dogs
+      ORDER BY dog_id
     `);
     res.json(rows);
   } catch (error) {
