@@ -117,6 +117,23 @@
               })
             });
 
+  async loadAllDogs() {
+    this.loadingDogs = true;
+    try {
+      // 1. Fetch the list of dogs from our local backend API
+      const dogListResponse = await fetch('/api/users/all-dogs');
+      if (!dogListResponse.ok) throw new Error('Failed to fetch dog list');
+      const dogList = await dogListResponse.json();
+
+      // 2. For each dog, create a promise that fetches a random photo
+      const photoPromises = dogList.map(dog =>
+        fetch('https://dog.ceo/api/breeds/image/random')
+          .then(res => res.json())
+          .then(photoData => ({ ...dog, photo: photoData.message }))
+          .catch(() => ({ ...dog, photo: 'https://placehold.co/100/CCCCCC/FFFFFF?text=Error' })) // Handle individual photo fetch errors
+      );
+
+
             const data = await response.json();
 
             if (response.ok) {
