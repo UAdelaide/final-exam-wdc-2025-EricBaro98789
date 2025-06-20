@@ -75,8 +75,23 @@ router.get('/my-dogs', async (req, res) => {
   }
 });
 
-
-
-
+// --- ADDED: Endpoint to get all dogs for the homepage display ---
+//
+router.get('/all-dogs', async (req, res) => {
+  try {
+    // This query joins the Dogs and Users tables to get the dog's name, size,
+    // and the owner's username, which is exactly what the frontend needs.
+    const [rows] = await db.query(`
+      SELECT d.dog_id, d.name, d.size, u.username as owner_username
+      FROM Dogs d
+      JOIN Users u ON d.owner_id = u.user_id
+      ORDER BY d.dog_id
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Failed to fetch all dogs:', error);
+    res.status(500).json({ error: 'Failed to fetch all dogs' });
+  }
+});
 
 module.exports = router;
