@@ -44,46 +44,7 @@
       </div>
     </div>
 
-    <!-- ADDED: Table to display all registered dogs with random photos -->
-<div class="mt-5">
-  <h2 class="text-center mb-4">All Registered Dogs</h2>
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <table class="table table-hover align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>Dog ID</th>
-            <th>Name</th>
-            <th>Size</th>
-            <th>Owner ID</th>
-            <th class="text-center">Photo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Shows a loading message while data is being fetched -->
-          <tr v-if="loadingDogs">
-            <td colspan="5" class="text-center p-4">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </td>
-          </tr>
-          <!-- Iterates over the dogs array to create a row for each dog -->
-          <tr v-for="dog in dogs" :key="dog.dog_id">
-            <td>{{ dog.dog_id }}</td>
-            <td>{{ dog.name }}</td>
-            <td>{{ dog.size }}</td>
-            <td>{{ dog.owner_id  }}</td>
-            <td class="text-center">
-              <!-- Displays the random photo fetched from the Dog API -->
-              <img :src="dog.photo" alt="A random dog photo" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+
 
 
   </div>
